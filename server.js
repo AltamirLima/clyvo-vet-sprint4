@@ -111,20 +111,65 @@ function serveStatic(req,res) {
     res.end(content);
   });
 }
+// ---------------------------------------------------------------------------
+// Integração PetFlow (API Java do grupo).
+// O token de colaborador do PetFlow vale 15 minutos e não tem refresh: um token
+// fixo no .env para de funcionar logo. Com PETFLOW_EMAIL e PETFLOW_SENHA, o
+// backend faz o próprio login, guarda o token por 14 minutos e repete o login
+// quando recebe 401. PETFLOW_TOKEN continua aceito, para uma demonstração curta.
+// ---------------------------------------------------------------------------
+const PETFLOW_TIMEOUT=90000; // o Render gratuito leva até ~80 s para acordar
+let petflowToken=null,petflowTokenExpira=0,especiePorRaca=null;
+function petflowConfig(){
+  return {url:(process.env.PETFLOW_API_URL||'').replace(/\/$/,''),email:process.env.PETFLOW_EMAIL||'',senha:process.env.PETFLOW_SENHA||'',token:process.env.PETFLOW_TOKEN||''};
+}
+function petflowConfigured(){const c=petflowConfig();return Boolean(c.url&&((c.email&&c.senha)||c.token));}
+async function petflowLogin(){
+  const c=petflowConfig();
+  if(!c.email||!c.senha){petflowToken=c.token;petflowTokenExpira=Infinity;return petflowToken;}
+  const r=await fetch(c.url+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:c.email,senha:c.senha,tipo:'COLABORADOR'}),signal:AbortSignal.timeout(PETFLOW_TIMEOUT)});
+  if(!r.ok) throw Object.assign(new Error('Login no PetFlow recusado: HTTP '+r.status),{loginStatus:r.status});
+  petflowToken=(await r.json()).accessToken;
+  petflowTokenExpira=Date.now()+14*60*1000; // vale 15 min: renova 1 min antes
+  return petflowToken;
+}
+async function petflowGet(rota){
+  const c=petflowConfig();
+  const chamar=t=>fetch(c.url+rota,{headers:{Authorization:'Bearer '+t,Accept:'application/json'},signal:AbortSignal.timeout(PETFLOW_TIMEOUT)});
+  const token=petflowToken&&Date.now()<petflowTokenExpira?petflowToken:await petflowLogin();
+  let r=await chamar(token);
+  if(r.status===401&&c.email&&c.senha){petflowToken=null;r=await chamar(await petflowLogin());} // expirou antes da hora: novo login, uma vez
+  return r;
+}
+// O PetResponse não traz a espécie: ela vem da raça (especieNome CANINA ou FELINA).
+async function carregarEspecies(){
+  if(especiePorRaca) return especiePorRaca;
+  const r=await petflowGet('/api/racas?size=500');
+  if(!r.ok) return new Map(); // não guarda falha em cache: tenta de novo na próxima importação
+  const page=await r.json();
+  especiePorRaca=new Map((page.content||[]).map(x=>[x.id,x.especieNome==='FELINA'?'FELINO':'CANINO']));
+  return especiePorRaca;
+}
 async function petflowPets(req,res){
-  const base=(process.env.PETFLOW_API_URL||'').replace(/\/$/,'');
-  const token=process.env.PETFLOW_TOKEN||'';
-  if(!base||!token) return send(res,503,{configured:false,error:'Integração PetFlow não configurada. Defina PETFLOW_API_URL e PETFLOW_TOKEN no .env.'});
+  if(!petflowConfigured()) return send(res,503,{configured:false,error:'Integração PetFlow não configurada. Defina PETFLOW_API_URL, PETFLOW_EMAIL e PETFLOW_SENHA no .env.'});
   try{
-    const upstream=await fetch(base+'/api/pets',{headers:{Authorization:'Bearer '+token,Accept:'application/json'},signal:AbortSignal.timeout(15000)});
+    const upstream=await petflowGet('/api/pets?size=100&sort=nome');
     const raw=await upstream.text();
-    if(!upstream.ok){console.error('[PetFlow] HTTP',upstream.status,raw.slice(0,500));return send(res,upstream.status===401||upstream.status===403?502:503,{configured:true,error:'Não foi possível consultar os pets no PetFlow. Verifique o acesso de colaborador.'});}
-    let data;try{data=JSON.parse(raw)}catch{return send(res,502,{configured:true,error:'A API PetFlow retornou dados inválidos.'});}
+    if(!upstream.ok){console.error('[PetFlow] HTTP',upstream.status,raw.slice(0,500));return send(res,502,{configured:true,error:upstream.status===401||upstream.status===403?'O PetFlow recusou o acesso. Confira a credencial de colaborador no .env.':'Não foi possível consultar os pets no PetFlow.'});}
+    let page;try{page=JSON.parse(raw)}catch{return send(res,502,{configured:true,error:'A API PetFlow retornou dados inválidos.'});}
+    // GET /api/pets devolve uma página (Page<PetResponse>): os pets estão em `content`
+    const especies=await carregarEspecies();
+    const data=(page.content||[]).map(p=>({...p,especie:especies.get(p.racaId)||'CANINO'}));
     return send(res,200,{configured:true,source:'PetFlow API',data});
-  }catch(e){console.error('[PetFlow]',e.message);return send(res,504,{configured:true,error:'A API PetFlow não respondeu dentro do tempo esperado.'});}
+  }catch(e){
+    console.error('[PetFlow]',e.message);
+    if(e.loginStatus) return send(res,502,{configured:true,error:'O PetFlow recusou o login de colaborador. Confira PETFLOW_EMAIL e PETFLOW_SENHA.'});
+    const timeout=e.name==='TimeoutError'||e.name==='AbortError';
+    return send(res,504,{configured:true,error:timeout?'O PetFlow não respondeu a tempo. No Render gratuito, a primeira chamada pode levar até 1 minuto e meio.':'Não foi possível conectar à API PetFlow.'});
+  }
 }
 http.createServer((req,res)=>{
-  if(req.method==='GET'&&req.url==='/api/health') return send(res,200,{status:'online',aiConfigured:Boolean(API_KEY&&API_KEY!=='coloque_sua_chave_aqui'),model:MODEL,petflowConfigured:Boolean(process.env.PETFLOW_API_URL&&process.env.PETFLOW_TOKEN)});
+  if(req.method==='GET'&&req.url==='/api/health') return send(res,200,{status:'online',aiConfigured:Boolean(API_KEY&&API_KEY!=='coloque_sua_chave_aqui'),model:MODEL,petflowConfigured:petflowConfigured()});
   if(req.method==='GET'&&req.url==='/api/petflow/pets') return petflowPets(req,res);
   if(req.method==='POST'&&req.url==='/api/ai/interpret') return interpret(req,res);
   if(req.url.startsWith('/api/')) return send(res,404,{error:'Endpoint não encontrado.'});

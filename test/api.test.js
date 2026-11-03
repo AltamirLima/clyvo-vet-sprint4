@@ -46,6 +46,27 @@ test('erro 404 do provedor é traduzido para mensagem clara',async()=>{
 });
 
 test('PetFlow informa configuração pendente sem credenciais',async()=>{
-  const app=await startApp({PETFLOW_API_URL:'',PETFLOW_TOKEN:''});
+  const app=await startApp({PETFLOW_API_URL:'',PETFLOW_EMAIL:'',PETFLOW_SENHA:'',PETFLOW_TOKEN:''});
   try{const r=await fetch(app.url+'/api/petflow/pets');const data=await r.json();assert.equal(r.status,503);assert.equal(data.configured,false);}finally{app.close();}
+});
+
+test('PetFlow: faz login de colaborador, lê a página e completa a espécie pela raça',async()=>{
+  let logins=0;
+  const fake=await listen((req,res)=>{
+    const json=(status,body)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(body));};
+    if(req.method==='POST'&&req.url==='/api/auth/login'){logins++;return json(200,{accessToken:'token-'+logins,tipo:'COLABORADOR'});}
+    if(req.headers.authorization!=='Bearer token-1') return json(401,{title:'Unauthorized'});
+    if(req.url.startsWith('/api/racas')) return json(200,{content:[{id:10,nome:'Siamês',especieNome:'FELINA'},{id:20,nome:'Labrador',especieNome:'CANINA'}]});
+    if(req.url.startsWith('/api/pets')) return json(200,{content:[{id:1,nome:'Mia',racaId:10,racaNome:'Siamês',porte:'PEQUENO',dtNascimento:'2022-03-15',tutorNome:'Maria'},{id:2,nome:'Bob',racaId:20,racaNome:'Labrador',porte:'GIGANTE',dtNascimento:'2019-01-01',tutorNome:'João'}],totalElements:2});
+    json(404,{});
+  });
+  const app=await startApp({PETFLOW_API_URL:fake.url,PETFLOW_EMAIL:'master@clyvovet.com',PETFLOW_SENHA:'teste',PETFLOW_TOKEN:''});
+  try{
+    const r=await fetch(app.url+'/api/petflow/pets');const body=await r.json();
+    assert.equal(r.status,200);
+    assert.equal(body.data.length,2);
+    assert.equal(body.data[0].especie,'FELINO');
+    assert.equal(body.data[1].especie,'CANINO');
+    assert.equal(logins,1,'um único login, reaproveitado nas duas chamadas');
+  }finally{app.close();fake.server.close();}
 });
