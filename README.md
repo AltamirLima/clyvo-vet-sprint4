@@ -106,7 +106,7 @@ CLYVO_VET_SPRINT4/
 
 ## 10. Entrega
 
-- **GitHub:** https://github.com/AltamirLima/clyvo-vet-sprint3
+- **GitHub:** https://github.com/AltamirLima/clyvo-vet-sprint4
 - **Vídeo Sprint 4:** ainda precisa ser gravado com a IA real configurada, publicado no YouTube como **Não listado**, e inserido no `LINKS.txt` e neste README.
 
 Antes de entregar, configure a chave no ambiente de demonstração, execute os testes, teste cenários de sucesso e falha, grave o vídeo e valide a integridade do ZIP.
@@ -116,7 +116,7 @@ Documentação oficial do endpoint Gemini: https://ai.google.dev/api/generate-co
 
 
 ## Observação sobre o repositório
-O nome histórico do repositório GitHub ainda é `clyvo-vet-sprint3`, mas o conteúdo e o pacote correspondem à Sprint 4. O nome do pacote Node é `clyvo-vet-sprint4`.
+O repositório se chamava `clyvo-vet-sprint3` e foi renomeado para `clyvo-vet-sprint4`. O endereço antigo redireciona para o novo.
 
 ## Integração PetFlow
 A tela **Pets cadastrados** tem a ação **Importar pets do PetFlow**, que traz os pets reais da API Java do grupo (PetFlow, sobre Oracle) para o CLYVO, onde podem ser analisados pela IA. O fluxo é **Oracle → API Java (PetFlow) → backend Node → interface → IA**.
