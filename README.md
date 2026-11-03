@@ -2,11 +2,18 @@
 
 Projeto acadêmico da disciplina **Disruptive Architectures: IoT, IoB & Generative IA**.
 
+
+### Integração PetFlow (opcional, via backend)
+
+A tela **Pets cadastrados** possui a ação **Importar pets do PetFlow**. O navegador chama `GET /api/petflow/pets`; o servidor Node consulta `GET /api/pets` no PetFlow usando `PETFLOW_API_URL` e `PETFLOW_TOKEN` configurados localmente no `.env`. O token nunca é enviado ao frontend. Sem credenciais, a aplicação mantém os pets locais de demonstração e informa que a integração está pendente.
+
+O formato retornado pelo PetFlow pode variar conforme o DTO/versão. A importação reconhece listas diretas e envelopes comuns (`content`, `pets`, `data`, `items`); confirme o contrato real com o responsável pela API antes da apresentação.
+
 ## Integrantes
 - **Olavo Porto Neves** — RM 563558
 - **Altamir Lima** — RM 562906
 - **Felipe Conte** — RM 562248
-- **Luiz Gustavo** — RM 564495
+- **Luiz Gustavo Gonçalves** — RM 564495
 - **Pedro Henrique Dias França** — RM 561940
 
 ## 1. O que foi implementado nesta Sprint
@@ -54,7 +61,7 @@ Uma recomendação ou retorno pode ser identificado durante o cuidado, mas não 
 1. Instale Node.js 18 ou superior.
 2. Copie `.env.example` para um arquivo chamado `.env`.
 3. Abra `.env` e configure `GEMINI_API_KEY` com sua chave. **Nunca publique ou envie esse arquivo ao GitHub.**
-4. O padrão usa `GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta` e `GEMINI_MODEL=gemini-2.5-flash`. Crie sua chave no Google AI Studio e mantenha-a somente no arquivo local `.env`.
+4. O padrão usa `GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta` e `GEMINI_MODEL=gemini-3.1-flash-lite`. Crie sua chave no Google AI Studio e mantenha-a somente no arquivo local `.env`.
 5. No terminal, dentro da pasta do projeto, execute `npm start`.
 6. Abra `http://localhost:3000`.
 7. Entre em **Demonstração IA**, selecione ou cadastre um pet, escreva uma mensagem fictícia e clique em **Interpretar mensagem com IA generativa**.
@@ -113,3 +120,16 @@ Antes de entregar, configure a chave no ambiente de demonstração, execute os t
 
 
 Documentação oficial do endpoint Gemini: https://ai.google.dev/api/generate-content.
+
+
+## Observação sobre o repositório
+O nome histórico do repositório GitHub ainda é `clyvo-vet-sprint3`, mas o conteúdo e o pacote correspondem à Sprint 4. O nome do pacote Node é `clyvo-vet-sprint4`.
+
+## Integração PetFlow
+O backend disponibiliza `GET /api/petflow/pets` como ponte segura para `GET /api/pets` do PetFlow. Configure `PETFLOW_API_URL` e `PETFLOW_TOKEN` no `.env` (token de colaborador fornecido pelo responsável pelo backend Java). O token permanece no servidor e nunca é enviado ao navegador. Sem credencial, a aplicação continua em modo demonstrativo local e informa que a integração não está configurada.
+
+## Modelo Gemini
+O modelo padrão foi atualizado para `gemini-3.1-flash-lite`. Ele pode ser substituído por `GEMINI_MODEL` no `.env`, caso a disponibilidade da API mude.
+
+## Vídeo pitch
+Pendente de gravação pelo grupo. Adicionar aqui o link não listado após a gravação.

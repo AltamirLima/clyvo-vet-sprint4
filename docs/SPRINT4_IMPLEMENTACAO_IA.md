@@ -32,7 +32,7 @@ Requisito: Node.js 18 ou superior.
 1. Instale Node.js 18+.
 2. Na pasta raiz do projeto, copie `.env.example` para `.env`.
 3. Preencha `GEMINI_API_KEY` com sua chave. Nunca commite o arquivo `.env`.
-4. A integração está configurada para a API Google Gemini. Crie uma chave no Google AI Studio e configure `GEMINI_API_KEY`; o padrão usa `GEMINI_MODEL=gemini-2.5-flash`.
+4. A integração está configurada para a API Google Gemini. Crie uma chave no Google AI Studio e configure `GEMINI_API_KEY`; o padrão usa `GEMINI_MODEL=gemini-3.1-flash-lite`.
 5. Execute `npm start`.
 6. Abra `http://localhost:3000`.
 7. Entre em Demonstração IA, selecione ou cadastre um pet, digite uma mensagem e clique em **Interpretar mensagem com IA generativa**.

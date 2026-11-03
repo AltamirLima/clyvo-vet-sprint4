@@ -28,4 +28,10 @@
 ## Limitações atuais
 - A IA real depende de chave válida, rede e modelo autorizado.
 - A aplicação ainda usa localStorage; não há banco remoto nem integração com prontuário clínico.
-- A API deve ser compatível com Chat Completions; outros formatos exigem adaptação do adaptador.
+- A API deve ser compatível com Gemini generateContent; outros formatos exigem adaptação do adaptador.
+
+
+## Pendências que dependem do grupo
+- [ ] Gravar vídeo pitch de aproximadamente 5 minutos.
+- [ ] Inserir link não listado do vídeo no README e em LINKS.txt.
+- [ ] Configurar credencial de colaborador PetFlow em `.env` e validar integração com dados reais.

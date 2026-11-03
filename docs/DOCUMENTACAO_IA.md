@@ -65,7 +65,7 @@ Recomendação
 Jornada: prevista → notificada → respondida → agendada → cumprida
 ```
 
-No protótipo front-end, a camada de API e o banco são **simulados conceitualmente**. A persistência local utiliza `localStorage` para demonstrar o fluxo sem exigir infraestrutura de backend.
+A interpretação de mensagens utiliza backend Node.js e API real Gemini (`generateContent`). O protótipo mantém os cadastros e históricos locais em `localStorage`; a ponte segura para a API PetFlow está disponível no backend e depende de credencial de colaborador para consultar os dados reais.
 
 ## 6. Arquitetura de integração
 
