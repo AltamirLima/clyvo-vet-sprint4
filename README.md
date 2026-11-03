@@ -2,13 +2,6 @@
 
 Projeto acadêmico da disciplina **Disruptive Architectures: IoT, IoB & Generative IA**.
 
-
-### Integração PetFlow (opcional, via backend)
-
-A tela **Pets cadastrados** possui a ação **Importar pets do PetFlow**. O navegador chama `GET /api/petflow/pets`; o servidor Node consulta `GET /api/pets` no PetFlow usando `PETFLOW_API_URL` e `PETFLOW_TOKEN` configurados localmente no `.env`. O token nunca é enviado ao frontend. Sem credenciais, a aplicação mantém os pets locais de demonstração e informa que a integração está pendente.
-
-O formato retornado pelo PetFlow pode variar conforme o DTO/versão. A importação reconhece listas diretas e envelopes comuns (`content`, `pets`, `data`, `items`); confirme o contrato real com o responsável pela API antes da apresentação.
-
 ## Integrantes
 - **Olavo Porto Neves** — RM 563558
 - **Altamir Lima** — RM 562906
@@ -126,7 +119,14 @@ Documentação oficial do endpoint Gemini: https://ai.google.dev/api/generate-co
 O nome histórico do repositório GitHub ainda é `clyvo-vet-sprint3`, mas o conteúdo e o pacote correspondem à Sprint 4. O nome do pacote Node é `clyvo-vet-sprint4`.
 
 ## Integração PetFlow
-O backend disponibiliza `GET /api/petflow/pets` como ponte segura para `GET /api/pets` do PetFlow. Configure `PETFLOW_API_URL` e `PETFLOW_TOKEN` no `.env` (token de colaborador fornecido pelo responsável pelo backend Java). O token permanece no servidor e nunca é enviado ao navegador. Sem credencial, a aplicação continua em modo demonstrativo local e informa que a integração não está configurada.
+A tela **Pets cadastrados** tem a ação **Importar pets do PetFlow**, que traz os pets reais da API Java do grupo (PetFlow, sobre Oracle) para o CLYVO, onde podem ser analisados pela IA. O fluxo é **Oracle → API Java (PetFlow) → backend Node → interface → IA**.
+
+- O navegador chama `GET /api/petflow/pets`. O backend Node faz login de colaborador no PetFlow com `PETFLOW_EMAIL` e `PETFLOW_SENHA` (do `.env`), consulta `GET /api/pets` e devolve a lista de pets já com a espécie, que vem da raça.
+- O token do PetFlow vale 15 minutos e não tem refresh: o backend o guarda por 14 minutos e faz um novo login quando ele vence. A credencial e o token nunca chegam ao navegador.
+- Os pets importados recebem id negativo, para não colidir com os pets locais de demonstração; reimportar substitui só os que vieram do PetFlow.
+- Sem credencial, a aplicação continua com os pets locais e informa que a integração não está configurada.
+
+Detalhes, formato do JSON e mapeamento dos campos: [`docs/INTEGRACAO_PETFLOW.md`](docs/INTEGRACAO_PETFLOW.md).
 
 ## Modelo Gemini
 O modelo padrão foi atualizado para `gemini-3.1-flash-lite`. Ele pode ser substituído por `GEMINI_MODEL` no `.env`, caso a disponibilidade da API mude.

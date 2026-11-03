@@ -27,11 +27,11 @@
 
 ## Limitações atuais
 - A IA real depende de chave válida, rede e modelo autorizado.
-- A aplicação ainda usa localStorage; não há banco remoto nem integração com prontuário clínico.
+- Análises e jornadas ficam no localStorage. Os pets podem ser importados da API PetFlow (Java sobre Oracle); não há integração com prontuário clínico.
 - A API deve ser compatível com Gemini generateContent; outros formatos exigem adaptação do adaptador.
 
 
 ## Pendências que dependem do grupo
 - [ ] Gravar vídeo pitch de aproximadamente 5 minutos.
 - [ ] Inserir link não listado do vídeo no README e em LINKS.txt.
-- [ ] Configurar credencial de colaborador PetFlow em `.env` e validar integração com dados reais.
+- [ ] Configurar `PETFLOW_EMAIL` e `PETFLOW_SENHA` (credencial de colaborador) em `.env`, acordar o Render (`/actuator/health`) e validar o botão **Importar pets do PetFlow** com dados reais.

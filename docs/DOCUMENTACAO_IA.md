@@ -113,4 +113,4 @@ O sistema não deve responder perguntas clínicas com diagnóstico, prescrição
 
 ## 10. Escopo do Sprint 4
 
-Este Sprint 4 especifica e demonstra o componente inteligente. O protótipo apresentado é uma simulação funcional do fluxo de decisão e da jornada; uma implementação de backend, APIs reais e banco persistente pode ser evoluída em etapas posteriores.
+Nesta Sprint 4, a interpretação de mensagens usa um backend Node.js com a API real do Google Gemini (`generateContent`), e os pets podem ser importados da API PetFlow do grupo (Java sobre Oracle). As análises e as jornadas do protótipo continuam no `localStorage` do navegador.
