@@ -41,6 +41,19 @@ function renderPets(){let q=(petSearch.value||'').toLowerCase().trim(),f=petFilt
 function showPet(id){let p=pets.find(x=>x.id===id);if(!p)return;let pj=journeys.filter(j=>j.petId===id),pa=analyses.filter(a=>a.petId===id);modalContent.innerHTML=`<div class="modal-profile"><div class="big-pet">${p.emoji}</div><div><span class="eyebrow">PERFIL DO PACIENTE</span><h2>${escapeHtml(p.name)}</h2><p>${escapeHtml(p.species)} • ${escapeHtml(p.breed)}</p></div></div><div class="detail-grid"><div class="detail"><small>IDADE</small><b>${p.age} anos</b></div><div class="detail"><small>PORTE</small><b>${p.size}</b></div><div class="detail"><small>TUTOR</small><b>${escapeHtml(p.tutor)}</b></div><div class="detail"><small>JORNADAS</small><b>${pj.length}</b></div></div><h3>Atividade registrada</h3><p>${pa.length} análise(s) de IA e ${pj.length} jornada(s) vinculada(s).</p><button class="primary" onclick="closeModal();usePetInIA(${p.id})">✦ Analisar este pet com IA</button>`;modal.classList.remove('hidden');}
 function closeModal(){modal.classList.add('hidden')}
 function deletePet(id){let p=pets.find(x=>x.id===id);if(!p||!confirm(`Excluir ${p.name}? As análises e jornadas vinculadas também serão removidas.`))return;pets=pets.filter(x=>x.id!==id);analyses=analyses.filter(a=>a.petId!==id);journeys=journeys.filter(j=>j.petId!==id);saveAll();refreshUI();}
+// Mapeamento do PetResponse do PetFlow (Java) para o card do CLYVO.
+const PORTE_PETFLOW={MINI:'PEQUENO',PEQUENO:'PEQUENO',MEDIO:'MEDIO',GRANDE:'GRANDE',GIGANTE:'GRANDE'};
+function idadeEmAnos(data){
+ if(!data)return 0;
+ const n=new Date(data),h=new Date();
+ let a=h.getFullYear()-n.getFullYear();
+ if(h<new Date(h.getFullYear(),n.getMonth(),n.getDate()))a--;
+ return Math.max(0,a);
+}
+function fromPetflow(x){
+ const species=x.especie==='FELINO'?'FELINO':'CANINO';
+ return {id:-Number(x.id),source:'PetFlow',name:String(x.nome||'Pet'),emoji:species==='FELINO'?'🐱':'🐶',species,breed:String(x.racaNome||'Não informada'),size:PORTE_PETFLOW[x.porte]||'MEDIO',age:idadeEmAnos(x.dtNascimento),tutor:String(x.tutorNome||'Tutor não informado'),status:'Importado do PetFlow',priority:'NORMAL'};
+}
 async function syncPetFlowPets(){
  const btn=[...document.querySelectorAll('button')].find(b=>b.getAttribute('onclick')==='syncPetFlowPets()');
  if(btn){btn.disabled=true;btn.textContent='Consultando PetFlow...';}
@@ -48,18 +61,15 @@ async function syncPetFlowPets(){
   const response=await fetch('/api/petflow/pets',{headers:{Accept:'application/json'}});
   const payload=await response.json().catch(()=>({error:'Resposta inválida do PetFlow.'}));
   if(!response.ok)throw new Error(payload.error||'Não foi possível consultar o PetFlow.');
-  const raw=payload.data;
-  const list=Array.isArray(raw)?raw:(raw?.content||raw?.pets||raw?.data||raw?.items||[]);
-  if(!Array.isArray(list))throw new Error('A API respondeu, mas o formato da lista de pets não foi reconhecido.');
+  // O backend devolve a lista de PetResponse do PetFlow (o `content` da página), já com `especie`.
+  const list=Array.isArray(payload.data)?payload.data:[];
   if(!list.length){alert('PetFlow conectado, mas não retornou pets para este colaborador.');return;}
-  const imported=list.map((x,i)=>{
-   const species=String(x.species||x.especie||x.tipo||'CANINO').toUpperCase().includes('FEL')?'FELINO':'CANINO';
-   return {id:Number(x.id||x.petId)||Date.now()+i,name:String(x.name||x.nome||x.petName||'Pet '+(i+1)),emoji:species==='FELINO'?'🐱':'🐶',species,breed:String(x.breed||x.raca||x.raça||'Não informada'),size:String(x.size||x.porte||'Não informado').toUpperCase(),age:Number(x.age||x.idade)||0,tutor:String(x.tutor?.name||x.tutorName||x.tutor||x.responsavel||'Tutor não informado'),status:'Importado do PetFlow',priority:'NORMAL',source:'PetFlow'};
-  });
-  // Merge por ID: preserva pets locais e atualiza somente os que vieram do PetFlow.
-  for(const pet of imported){const idx=pets.findIndex(x=>String(x.id)===String(pet.id));if(idx>=0)pets[idx]={...pets[idx],...pet};else pets.push(pet);}
-  saveAll();refreshUI();alert(`${imported.length} pet(s) sincronizado(s) do PetFlow. A origem foi identificada no cadastro.`);
- }catch(e){alert(e.message+'\n\nOs pets locais foram preservados. Confira PETFLOW_API_URL e o token de colaborador no .env.');}
+  const imported=list.map(fromPetflow);
+  // Os importados têm id negativo: não colidem com os pets locais (1, 2, 3... e Date.now()).
+  // Reimportar substitui só os que vieram do PetFlow, sem duplicar e sem tocar nos locais.
+  pets=pets.filter(p=>p.source!=='PetFlow').concat(imported);
+  saveAll();refreshUI();alert(`${imported.length} pet(s) importado(s) do PetFlow (API Java + Oracle do grupo).`);
+ }catch(e){alert(e.message+'\n\nOs pets locais foram preservados. Confira PETFLOW_API_URL, PETFLOW_EMAIL e PETFLOW_SENHA no .env.');}
  finally{if(btn){btn.disabled=false;btn.textContent='↻ Importar pets do PetFlow';}}
 }
 function openPetForm(){modalContent.innerHTML=`<span class="eyebrow">NOVO PACIENTE</span><h2>Cadastrar novo pet</h2><p>Adicione o paciente para iniciar o acompanhamento.</p><form onsubmit="addPet(event)"><div class="form-grid"><label>Nome<input id="newName" required></label><label>Espécie<select id="newSpecies" required><option value="">Selecione</option><option value="CANINO">Canino</option><option value="FELINO">Felino</option></select></label><label>Raça<input id="newBreed" required></label><label>Porte<select id="newSize" required><option value="">Selecione</option><option value="PEQUENO">Pequeno</option><option value="MEDIO">Médio</option><option value="GRANDE">Grande</option></select></label><label>Idade<input id="newAge" type="number" min="0" max="40" required></label><label>Tutor<input id="newTutor" required></label></div><button class="primary full">Cadastrar pet</button></form>`;modal.classList.remove('hidden')}
