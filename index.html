@@ -19,7 +19,7 @@
     <button class="nav" data-view="data"><i>◫</i><span>Dados & IA</span></button>
     <button class="nav" data-view="journey"><i>◎</i><span>Jornada</span></button>
   </nav>
-  <div class="side-status"><span class="pulse"></span><div><b>Sistema operacional</b><small>Motor de regras ativo</small></div></div>
+  <div class="side-status"><span class="pulse"></span><div><b>Aplicação local</b><small>Motor de regras disponível</small></div></div>
 </aside>
 
 <main>
@@ -35,22 +35,22 @@
  </div>
  <div class="kpis">
   <article><div class="kicon teal">🐾</div><div><small>PETS CADASTRADOS</small><strong id="kPets">4</strong><span>Base ativa</span></div></article>
-  <article><div class="kicon purple">✦</div><div><small>ANÁLISES REALIZADAS</small><strong id="kAnalyses">12</strong><span>Motor inteligente</span></div></article>
-  <article><div class="kicon orange">◷</div><div><small>PRÓXIMAS AÇÕES</small><strong id="kObligations">7</strong><span>Cuidados previstos</span></div></article>
+  <article><div class="kicon purple">✦</div><div><small>ANÁLISES REALIZADAS</small><strong id="kAnalyses">0</strong><span>Motor inteligente</span></div></article>
+  <article><div class="kicon orange">◷</div><div><small>PRÓXIMAS AÇÕES</small><strong id="kObligations">0</strong><span>Cuidados previstos</span></div></article>
  </div>
  <div class="dashboard-grid simplified"><section class="panel priorities"><div class="panel-title"><div><span class="label">ATENÇÃO NECESSÁRIA</span><h3>Ações que precisam de acompanhamento</h3><p>Prioridades geradas pelas análises e jornadas em andamento.</p></div><button class="text-btn" onclick="go('journey')">Ver todas →</button></div><div id="attentionList" class="attention-list"></div></section></div>
  <section class="panel pet-preview"><div class="panel-title"><div><span class="label">BASE DE PACIENTES</span><h3>Pets inscritos</h3><p>Selecione um pet para consultar seus dados completos.</p></div><button class="primary small" onclick="go('pets')">Gerenciar pets</button></div><div id="petPreview" class="pet-grid"></div></section>
 </section>
 
 <section id="pets" class="view">
- <div class="section-head"><div><span class="eyebrow">BASE DE PACIENTES</span><h2>Pets cadastrados</h2><p>Cadastre e consulte os perfis usados nas análises.</p></div><button class="primary" onclick="openPetForm()">＋ Novo pet</button></div>
+ <div class="section-head"><div><span class="eyebrow">BASE DE PACIENTES</span><h2>Pets cadastrados</h2><p>Cadastre e consulte os perfis usados nas análises.</p></div><div class="head-actions"><button class="outline" onclick="syncPetFlowPets()">↻ Importar pets do PetFlow</button><button class="primary" onclick="openPetForm()">＋ Novo pet</button></div></div>
  <div class="pet-toolbar"><input id="petSearch" placeholder="🔎 Buscar por nome, espécie ou raça..." oninput="renderPets()"><select id="petFilter" onchange="renderPets()"><option value="">Todas as espécies</option><option>CANINO</option><option>FELINO</option></select></div>
  <div id="petList" class="pet-list"></div>
  <section class="panel pet-analysis-panel"><div class="panel-title"><div><span class="label">MEMÓRIA DA IA</span><h3>Análises salvas por pet</h3><p>Selecione um paciente para consultar todas as demonstrações de IA já realizadas.</p></div></div><select id="petAnalysisSelect" onchange="renderPetAnalysisHistory()"></select><div id="petAnalysisHistory" class="analysis-history"></div></section>
 </section>
 
 <section id="ia" class="view">
- <div class="section-head"><div><span class="eyebrow">MOTOR INTELIGENTE</span><h2>Assistente inteligente</h2><p>Descreva a mensagem do tutor. A IA interpreta a intenção; as regras mostram os protocolos aplicáveis.</p></div><div class="ia-status"><span class="pulse"></span> Motor online</div></div>
+ <div class="section-head"><div><span class="eyebrow">MOTOR INTELIGENTE</span><h2>Assistente inteligente</h2><p>Descreva a mensagem do tutor. A IA interpreta a intenção; as regras mostram os protocolos aplicáveis.</p></div><div class="ia-status"><span class="pulse"></span> IA via API (status verificado ao solicitar)</div></div>
  <div class="ia-layout">
   <section class="panel form-panel"><div class="step-title"><span>01</span><div><b>Perfil do pet</b><small>Confira os dados antes de analisar</small></div></div>
    <form id="iaForm"><div class="form-grid">
@@ -92,7 +92,7 @@
 
 <section id="journey" class="view">
  <div class="section-head"><div><span class="eyebrow">ACOMPANHAMENTO</span><h2>Jornada do cuidado</h2><p>Acompanhe as etapas de uma ação, da identificação à conclusão.</p></div><button class="outline" onclick="resetJourney()">↺ Reiniciar jornada</button></div>
- <div class="panel journey-main"><div class="journey-progress"><div id="progressFill"></div></div><div id="journeySteps" class="journey-steps"></div><div class="journey-detail"><div id="journeyIcon" class="journey-icon">📅</div><div><span class="label" id="journeyStageLabel">ETAPA 1 DE 5</span><h3 id="journeyTitle">Obrigação prevista</h3><p id="journeyText">O Motor Inteligente identificou um protocolo aplicável e criou uma obrigação futura.</p></div></div><div class="journey-actions"><button id="prevJourney" class="ghost" onclick="previousJourney()">← Voltar</button><button id="nextJourney" class="primary" onclick="nextJourney()">Avançar etapa →</button></div></div>
+ <div class="panel journey-main"><div class="journey-progress"><div id="progressFill"></div></div><div id="journeySteps" class="journey-steps"></div><div class="journey-detail"><div id="journeyIcon" class="journey-icon">📅</div><div><span class="label" id="journeyStageLabel">ETAPA 1 DE 5</span><h3 id="journeyTitle">Obrigação prevista</h3><p id="journeyText">O Motor Inteligente identificou um protocolo aplicável e criou uma obrigação futura.</p></div></div><div class="journey-actions"><button id="prevJourney" class="ghost" onclick="previousJourney()">← Voltar</button><button id="nextJourney" class="primary" onclick="advanceJourney()">Avançar etapa →</button></div></div>
  <div class="journey-events panel"><div class="panel-title"><div><span class="label">EVENTOS REGISTRADOS</span><h3>Histórico da simulação</h3></div><button class="text-btn" onclick="clearEvents()">Limpar</button></div><div id="eventLog" class="event-log"></div></div>
  <div class="attribution"><div><span class="label">RESULTADO</span><h3>Da recomendação ao cuidado</h3><p>O sistema acompanha a obrigação até a conclusão do atendimento.</p><strong>Obrigação → Notificação → Agendamento → Atendimento</strong></div></div>
 </section>

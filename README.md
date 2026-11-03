@@ -6,7 +6,7 @@ Projeto acadêmico da disciplina **Disruptive Architectures: IoT, IoB & Generati
 - **Olavo Porto Neves** — RM 563558
 - **Altamir Lima** — RM 562906
 - **Felipe Conte** — RM 562248
-- **Luiz Gustavo** — RM 564495
+- **Luiz Gustavo Gonçalves** — RM 564495
 - **Pedro Henrique Dias França** — RM 561940
 
 ## 1. O que foi implementado nesta Sprint
@@ -54,7 +54,7 @@ Uma recomendação ou retorno pode ser identificado durante o cuidado, mas não 
 1. Instale Node.js 18 ou superior.
 2. Copie `.env.example` para um arquivo chamado `.env`.
 3. Abra `.env` e configure `GEMINI_API_KEY` com sua chave. **Nunca publique ou envie esse arquivo ao GitHub.**
-4. O padrão usa `GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta` e `GEMINI_MODEL=gemini-2.5-flash`. Crie sua chave no Google AI Studio e mantenha-a somente no arquivo local `.env`.
+4. O padrão usa `GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta` e `GEMINI_MODEL=gemini-3.1-flash-lite`. Crie sua chave no Google AI Studio e mantenha-a somente no arquivo local `.env`.
 5. No terminal, dentro da pasta do projeto, execute `npm start`.
 6. Abra `http://localhost:3000`.
 7. Entre em **Demonstração IA**, selecione ou cadastre um pet, escreva uma mensagem fictícia e clique em **Interpretar mensagem com IA generativa**.
@@ -106,10 +106,30 @@ CLYVO_VET_SPRINT4/
 
 ## 10. Entrega
 
-- **GitHub:** https://github.com/AltamirLima/clyvo-vet-sprint3
+- **GitHub:** https://github.com/AltamirLima/clyvo-vet-sprint4
 - **Vídeo Sprint 4:** ainda precisa ser gravado com a IA real configurada, publicado no YouTube como **Não listado**, e inserido no `LINKS.txt` e neste README.
 
 Antes de entregar, configure a chave no ambiente de demonstração, execute os testes, teste cenários de sucesso e falha, grave o vídeo e valide a integridade do ZIP.
 
 
 Documentação oficial do endpoint Gemini: https://ai.google.dev/api/generate-content.
+
+
+## Observação sobre o repositório
+O repositório se chamava `clyvo-vet-sprint3` e foi renomeado para `clyvo-vet-sprint4`. O endereço antigo redireciona para o novo.
+
+## Integração PetFlow
+A tela **Pets cadastrados** tem a ação **Importar pets do PetFlow**, que traz os pets reais da API Java do grupo (PetFlow, sobre Oracle) para o CLYVO, onde podem ser analisados pela IA. O fluxo é **Oracle → API Java (PetFlow) → backend Node → interface → IA**.
+
+- O navegador chama `GET /api/petflow/pets`. O backend Node faz login de colaborador no PetFlow com `PETFLOW_EMAIL` e `PETFLOW_SENHA` (do `.env`), consulta `GET /api/pets` e devolve a lista de pets já com a espécie, que vem da raça.
+- O token do PetFlow vale 15 minutos e não tem refresh: o backend o guarda por 14 minutos e faz um novo login quando ele vence. A credencial e o token nunca chegam ao navegador.
+- Os pets importados recebem id negativo, para não colidir com os pets locais de demonstração; reimportar substitui só os que vieram do PetFlow.
+- Sem credencial, a aplicação continua com os pets locais e informa que a integração não está configurada.
+
+Detalhes, formato do JSON e mapeamento dos campos: [`docs/INTEGRACAO_PETFLOW.md`](docs/INTEGRACAO_PETFLOW.md).
+
+## Modelo Gemini
+O modelo padrão foi atualizado para `gemini-3.1-flash-lite`. Ele pode ser substituído por `GEMINI_MODEL` no `.env`, caso a disponibilidade da API mude.
+
+## Vídeo pitch
+Pendente de gravação pelo grupo. Adicionar aqui o link não listado após a gravação.
