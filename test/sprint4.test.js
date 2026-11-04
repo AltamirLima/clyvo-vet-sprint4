@@ -21,3 +21,11 @@ test('chave é carregada no backend e não no navegador', () => {
   assert.ok(server.includes('process.env.GEMINI_API_KEY'));
   assert.ok(server.includes("'x-goog-api-key':API_KEY"));
 });
+
+
+test('mensagens que exigem veterinário bloqueiam a criação automática de ações na jornada', () => {
+  const app = fs.readFileSync(path.join(__dirname, '..', 'assets', 'app.js'), 'utf8');
+  assert.ok(app.includes('aiContext?.needsVet'));
+  assert.ok(app.includes('Jornada preventiva pausada.'));
+  assert.ok(app.includes('Nenhuma ação automática será criada.'));
+});
