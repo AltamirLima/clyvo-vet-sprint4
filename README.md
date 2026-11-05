@@ -107,13 +107,9 @@ CLYVO_VET_SPRINT4/
 ## 10. Entrega
 
 - **GitHub:** https://github.com/AltamirLima/clyvo-vet-sprint4
-- **Vídeo Sprint 4:** ainda precisa ser gravado com a IA real configurada, publicado no YouTube como **Não listado**, e inserido no `LINKS.txt` e neste README.
+- **Vídeo pitch Sprint 4 (YouTube):** https://www.youtube.com/watch?v=28eXsLMHgDE
 
-Antes de entregar, configure a chave no ambiente de demonstração, execute os testes, teste cenários de sucesso e falha, grave o vídeo e valide a integridade do ZIP.
-
-
-Documentação oficial do endpoint Gemini: https://ai.google.dev/api/generate-content.
-
+Antes da entrega, configure a chave no ambiente de demonstração, execute os testes e valide a integridade do ZIP.
 
 ## Observação sobre o repositório
 O repositório se chamava `clyvo-vet-sprint3` e foi renomeado para `clyvo-vet-sprint4`. O endereço antigo redireciona para o novo.
